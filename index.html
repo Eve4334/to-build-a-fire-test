@@ -3,68 +3,179 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>你能在零下50度中活下來嗎？</title>
+  <title id="pageTitle">你能在零下50度中活下來嗎？</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(to bottom, #e0f7fa, #b2ebf2); /* 淺藍到水藍的漸層 */
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      color: #333; /* 深灰色文字，在淺色背景上更清晰 */
+    }
+  </style>
 </head>
-<body class="bg-blue-50 text-gray-800 font-sans">
-  <div class="max-w-xl mx-auto p-4">
-    <h1 class="text-3xl font-bold mb-4 text-center">你能在零下50度中活下來嗎？</h1>
+<body class="">
+  <div class="fixed top-4 right-4 z-10">
+    <button id="zhBtn" class="px-3 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400">中文</button>
+    <button id="enBtn" class="ml-2 px-3 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400">English</button>
+  </div>
+  <div class="max-w-xl mx-auto p-6 rounded-lg shadow-xl bg-white bg-opacity-80">
+    <h1 id="mainTitle" class="text-3xl font-bold mb-6 text-center text-blue-600 shadow-md">
+      你能在零下50度中活下來嗎？
+    </h1>
     <div id="quiz"></div>
-    <button id="submitBtn" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 hidden">查看結果</button>
-    <div id="result" class="mt-6 hidden">
-      <h2 class="text-2xl font-semibold mb-2">你的求生人格</h2>
+    <button id="submitBtn" class="mt-4 px-6 py-3 bg-blue-400 text-white rounded-md hover:bg-blue-500 focus:outline-none focus:ring-blue-300 hidden">
+      查看結果
+    </button>
+    <div id="result" class="mt-8 p-6 rounded-lg shadow-xl bg-white bg-opacity-80 hidden">
+      <h2 id="resultTitle" class="text-2xl font-semibold mb-4 text-blue-600">你的求生人格</h2>
       <canvas id="radarChart" width="400" height="400"></canvas>
-      <p id="typeText" class="mt-4 text-lg"></p>
+      <p id="typeText" class="mt-4 text-lg text-gray-700"></p>
     </div>
   </div>
 
   <script>
-    const questions = [
-      {
-        text: "你發現氣溫已降到零下五十度，你會？",
-        options: [
-          { text: "按計畫出發，我相信自己判斷", score: { I: 1, T: 1 } },
-          { text: "改變計畫，等有人陪我再出發", score: { F: 1, J: 1 } },
-          { text: "想太多會拖慢進度，先走再說", score: { E: 1, P: 1 } }
-        ]
+    const translations = {
+      zh: {
+        pageTitle: "你能在零下50度中活下來嗎？",
+        mainTitle: "你能在零下50度中活下來嗎？",
+        submitBtn: "查看結果",
+        resultTitle: "你的求生人格",
+        typeTextPrefix: "你的 MBTI 傾向是",
+        questions: [
+          {
+            text: "你發現氣溫已降到零下五十度，你會？",
+            options: [
+              "按計畫出發，我相信自己判斷",
+              "改變計畫，等有人陪我再出發",
+              "想太多會拖慢進度，先走再說"
+            ]
+          },
+          {
+            text: "途中你掉進了冰冷的溪水，你會怎麼辦？",
+            options: [
+              "找樹下避風處再升火",
+              "立刻原地升火，不能再拖了",
+              "嘗試靠奔跑取暖"
+            ]
+          },
+          {
+            text: "火被雪熄滅了。你會？",
+            options: [
+              "再試一次升火",
+              "尋找狗，希望靠牠保暖",
+              "感到絕望，想著自己快撐不下去了"
+            ]
+          },
+          {
+            text: "手指凍傷幾乎不能動，你？",
+            options: [
+              "咬牙堅持嘗試升火",
+              "開始回想人生，準備面對死亡",
+              "怒吼奔跑發洩情緒"
+            ]
+          },
+          {
+            text: "最後一次選擇機會，你會？",
+            options: [
+              "放下一切靜靜等待",
+              "抱住狗，試圖從牠身上取暖",
+              "盡最後一絲力氣繼續前進"
+            ]
+          },
+        ],
       },
-      {
-        text: "途中你掉進了冰冷的溪水，你會怎麼辦？",
-        options: [
-          { text: "找樹下避風處再升火", score: { J: 1, S: 1 } },
-          { text: "立刻原地升火，不能再拖了", score: { P: 1, T: 1 } },
-          { text: "嘗試靠奔跑取暖", score: { E: 1, S: 1 } }
-        ]
+      en: {
+        pageTitle: "Can You Survive in -50 Degrees?",
+        mainTitle: "Can You Survive in -50 Degrees?",
+        submitBtn: "View Result",
+        resultTitle: "Your Survival Personality",
+        typeTextPrefix: "Your MBTI type is",
+        questions: [
+          {
+            text: "You find that the temperature has dropped to -50 degrees Celsius. What do you do?",
+            options: [
+              "Depart as planned. I trust my judgment.",
+              "Change plans and wait for someone to accompany me.",
+              "Thinking too much will slow progress. Just go first."
+            ]
+          },
+          {
+            text: "You fall into an icy river. What do you do?",
+            options: [
+              "Find a sheltered spot under a tree and then make a fire.",
+              "Immediately make a fire on the spot. Can't delay any longer.",
+              "Try to warm up by running."
+            ]
+          },
+          {
+            text: "The fire is extinguished by snow. What do you do?",
+            options: [
+              "Try to make a fire again.",
+              "Look for a dog, hoping to keep warm with it.",
+              "Feel despair, thinking I can't hold on any longer."
+            ]
+          },
+          {
+            text: "Your fingers are frostbitten and almost immobile. What do you do?",
+            options: [
+              "Grit your teeth and try to make a fire.",
+              "Start reminiscing about life, preparing to face death.",
+              "Roar and run to vent emotions."
+            ]
+          },
+          {
+            text: "Your last chance to choose, what do you do?",
+            options: [
+              "Let go of everything and wait quietly.",
+              "Hold the dog, trying to get warmth from it.",
+              "Continue moving forward with the last bit of strength."
+            ]
+          },
+        ],
       },
-      {
-        text: "火被雪熄滅了。你會？",
-        options: [
-          { text: "再試一次升火", score: { J: 1, T: 1 } },
-          { text: "尋找狗，希望靠牠保暖", score: { F: 1, S: 1 } },
-          { text: "感到絕望，想著自己快撐不下去了", score: { N: 1, I: 1 } }
-        ]
-      },
-      {
-        text: "手指凍傷幾乎不能動，你？",
-        options: [
-          { text: "咬牙堅持嘗試升火", score: { T: 1, J: 1 } },
-          { text: "開始回想人生，準備面對死亡", score: { N: 1, I: 1 } },
-          { text: "怒吼奔跑發洩情緒", score: { E: 1, F: 1 } }
-        ]
-      },
-      {
-        text: "最後一次選擇機會，你會？",
-        options: [
-          { text: "放下一切靜靜等待", score: { I: 1, N: 1 } },
-          { text: "抱住狗，試圖從牠身上取暖", score: { F: 1, S: 1 } },
-          { text: "盡最後一絲力氣繼續前進", score: { T: 1, J: 1 } }
-        ]
-      },
-    ];
+    };
 
-    const quizDiv = document.getElementById('quiz');
+    let currentLanguage = 'zh'; // 預設語言
+
+    const pageTitle = document.getElementById('pageTitle');
+    const mainTitle = document.getElementById('mainTitle');
     const submitBtn = document.getElementById('submitBtn');
+    const resultTitle = document.getElementById('resultTitle');
+    const questionElements = document.querySelectorAll('#quiz > div');
+
+    function updateContent(lang) {
+      const t = translations[lang];
+      pageTitle.innerText = t.pageTitle;
+      mainTitle.innerText = t.mainTitle;
+      submitBtn.innerText = t.submitBtn;
+      resultTitle.innerText = t.resultTitle;
+      const typeTextElement = document.getElementById('typeText');
+      if (typeTextElement && typeTextElement.innerText.startsWith(translations[currentLanguage].typeTextPrefix)) {
+        typeTextElement.innerText = `${t.typeTextPrefix} ${typeTextElement.innerText.substring(translations[currentLanguage].typeTextPrefix.length).trim()}`;
+      }
+
+      questionElements.forEach((qDiv, i) => {
+        const question = t.questions[i];
+        qDiv.querySelector('p').innerText = `${i + 1}. ${question.text}`;
+        const options = qDiv.querySelectorAll('label');
+        question.options.forEach((optText, j) => {
+          options[j].innerText = optText;
+        });
+      });
+      currentLanguage = lang;
+      document.documentElement.lang = lang; // 更新 HTML 的 lang 屬性
+    }
+
+    document.getElementById('zhBtn').addEventListener('click', () => updateContent('zh'));
+    document.getElementById('enBtn').addEventListener('click', () => updateContent('en'));
+
+    // 頁面載入時更新一次內容
+    updateContent(currentLanguage);
+
+    const questions = [ /* ... (你的原始問題陣列) ... */ ];
+    const quizDiv = document.getElementById('quiz');
     const resultDiv = document.getElementById('result');
     const typeText = document.getElementById('typeText');
     const scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
@@ -104,15 +215,15 @@
       const radarData = {
         labels,
         datasets: [{
-          label: 'MBTI 傾向',
+          label: translations[currentLanguage].resultTitle.split(' ')[0], // 使用翻譯後的標題的一部分
           data: [
             scores.E - scores.I,
             scores.S - scores.N,
             scores.T - scores.F,
             scores.J - scores.P
           ].map(x => (x + 3) * 10), // shift for chart display
-          backgroundColor: 'rgba(59, 130, 246, 0.2)',
-          borderColor: 'rgba(59, 130, 246, 1)',
+          backgroundColor: 'rgba(173, 216, 230, 0.4)', // 淺藍色
+          borderColor: 'rgba(173, 216, 230, 1)',
           borderWidth: 2
         }]
       };
@@ -124,14 +235,37 @@
           scales: {
             r: {
               suggestedMin: 0,
-              suggestedMax: 60
+              suggestedMax: 60,
+              ticks: {
+                backdropColor: 'rgba(255, 255, 255, 0.7)',
+                color: '#333'
+              },
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)'
+              },
+              pointLabels: {
+                color: '#333'
+              }
+            }
+          },
+          elements: {
+            line: {
+              tension: 0.2,
+              borderColor: 'rgba(173, 216, 230, 1)',
+              borderWidth: 2
+            },
+            point: {
+              radius: 4,
+              backgroundColor: 'rgba(173, 216, 230, 1)',
+              borderColor: '#fff',
+              borderWidth: 1
             }
           }
         }
       });
 
       const type = `${scores.I > scores.E ? 'I' : 'E'}${scores.S > scores.N ? 'S' : 'N'}${scores.T > scores.F ? 'T' : 'F'}${scores.J > scores.P ? 'J' : 'P'}`;
-      typeText.innerText = `你的 MBTI 傾向是 ${type}`;
+      typeText.innerText = `${translations[currentLanguage].typeTextPrefix} ${type}`;
 
       resultDiv.classList.remove('hidden');
       submitBtn.disabled = true;
