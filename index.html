@@ -3,273 +3,200 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="pageTitle">你能在零下50度中活下來嗎？</title>
+  <title>你能在零下50度中活下來嗎？</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
-      background: linear-gradient(to bottom, #e0f7fa, #b2ebf2); /* 淺藍到水藍的漸層 */
-      background-repeat: no-repeat;
+      background-image: url('https://images.unsplash.com/photo-1608889175123-9d6b6900c43f');
+      background-size: cover;
+      background-position: center;
       background-attachment: fixed;
-      color: #333; /* 深灰色文字，在淺色背景上更清晰 */
+    }
+    .frosted {
+      background-color: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(8px);
+      border-radius: 1rem;
+      padding: 2rem;
+    }
+    .mbti-img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
     }
   </style>
 </head>
-<body class="">
-  <div class="fixed top-4 right-4 z-10">
-    <button id="zhBtn" class="px-3 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400">中文</button>
-    <button id="enBtn" class="ml-2 px-3 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400">English</button>
-  </div>
-  <div class="max-w-xl mx-auto p-6 rounded-lg shadow-xl bg-white bg-opacity-80">
-    <h1 id="mainTitle" class="text-3xl font-bold mb-6 text-center text-blue-600 shadow-md">
-      你能在零下50度中活下來嗎？
-    </h1>
+<body class="text-gray-800 font-sans">
+  <div class="max-w-2xl mx-auto mt-10 frosted text-center">
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-3xl font-bold">你能在零下50度中活下來嗎？</h1>
+      <button onclick="toggleLang()" class="text-sm text-blue-600 underline">EN/中</button>
+    </div>
     <div id="quiz"></div>
-    <button id="submitBtn" class="mt-4 px-6 py-3 bg-blue-400 text-white rounded-md hover:bg-blue-500 focus:outline-none focus:ring-blue-300 hidden">
-      查看結果
-    </button>
-    <div id="result" class="mt-8 p-6 rounded-lg shadow-xl bg-white bg-opacity-80 hidden">
-      <h2 id="resultTitle" class="text-2xl font-semibold mb-4 text-blue-600">你的求生人格</h2>
+    <button id="submitBtn" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 hidden">查看結果</button>
+    <div id="result" class="mt-6 hidden">
+      <h2 class="text-xl font-semibold mb-2">你的求生人格</h2>
       <canvas id="radarChart" width="400" height="400"></canvas>
-      <p id="typeText" class="mt-4 text-lg text-gray-700"></p>
+      <p id="typeText" class="mt-4 text-lg"></p>
+      <div class="mt-4" id="mbtiImage"></div>
     </div>
   </div>
 
-  <script>
-    const translations = {
-      zh: {
-        pageTitle: "你能在零下50度中活下來嗎？",
-        mainTitle: "你能在零下50度中活下來嗎？",
-        submitBtn: "查看結果",
-        resultTitle: "你的求生人格",
-        typeTextPrefix: "你的 MBTI 傾向是",
-        questions: [
-          {
-            text: "你發現氣溫已降到零下五十度，你會？",
-            options: [
-              "按計畫出發，我相信自己判斷",
-              "改變計畫，等有人陪我再出發",
-              "想太多會拖慢進度，先走再說"
-            ]
-          },
-          {
-            text: "途中你掉進了冰冷的溪水，你會怎麼辦？",
-            options: [
-              "找樹下避風處再升火",
-              "立刻原地升火，不能再拖了",
-              "嘗試靠奔跑取暖"
-            ]
-          },
-          {
-            text: "火被雪熄滅了。你會？",
-            options: [
-              "再試一次升火",
-              "尋找狗，希望靠牠保暖",
-              "感到絕望，想著自己快撐不下去了"
-            ]
-          },
-          {
-            text: "手指凍傷幾乎不能動，你？",
-            options: [
-              "咬牙堅持嘗試升火",
-              "開始回想人生，準備面對死亡",
-              "怒吼奔跑發洩情緒"
-            ]
-          },
-          {
-            text: "最後一次選擇機會，你會？",
-            options: [
-              "放下一切靜靜等待",
-              "抱住狗，試圖從牠身上取暖",
-              "盡最後一絲力氣繼續前進"
-            ]
-          },
-        ],
-      },
-      en: {
-        pageTitle: "Can You Survive in -50 Degrees?",
-        mainTitle: "Can You Survive in -50 Degrees?",
-        submitBtn: "View Result",
-        resultTitle: "Your Survival Personality",
-        typeTextPrefix: "Your MBTI type is",
-        questions: [
-          {
-            text: "You find that the temperature has dropped to -50 degrees Celsius. What do you do?",
-            options: [
-              "Depart as planned. I trust my judgment.",
-              "Change plans and wait for someone to accompany me.",
-              "Thinking too much will slow progress. Just go first."
-            ]
-          },
-          {
-            text: "You fall into an icy river. What do you do?",
-            options: [
-              "Find a sheltered spot under a tree and then make a fire.",
-              "Immediately make a fire on the spot. Can't delay any longer.",
-              "Try to warm up by running."
-            ]
-          },
-          {
-            text: "The fire is extinguished by snow. What do you do?",
-            options: [
-              "Try to make a fire again.",
-              "Look for a dog, hoping to keep warm with it.",
-              "Feel despair, thinking I can't hold on any longer."
-            ]
-          },
-          {
-            text: "Your fingers are frostbitten and almost immobile. What do you do?",
-            options: [
-              "Grit your teeth and try to make a fire.",
-              "Start reminiscing about life, preparing to face death.",
-              "Roar and run to vent emotions."
-            ]
-          },
-          {
-            text: "Your last chance to choose, what do you do?",
-            options: [
-              "Let go of everything and wait quietly.",
-              "Hold the dog, trying to get warmth from it.",
-              "Continue moving forward with the last bit of strength."
-            ]
-          },
-        ],
-      },
-    };
+<script>
+const translations = {
+  zh: {
+    title: "你能在零下50度中活下來嗎？",
+    submit: "查看結果",
+    result: "你的求生人格"
+  },
+  en: {
+    title: "Can You Survive at -50°C?",
+    submit: "See Results",
+    result: "Your Survival Personality"
+  }
+};
+let lang = "zh";
+function toggleLang() {
+  lang = lang === "zh" ? "en" : "zh";
+  document.querySelector("h1").innerText = translations[lang].title;
+  document.getElementById("submitBtn").innerText = translations[lang].submit;
+  document.querySelector("#result h2").innerText = translations[lang].result;
+}
 
-    let currentLanguage = 'zh'; // 預設語言
+const mbtiMap = {
+  INTJ: "https://i.imgur.com/qV5x6AY.png",
+  INTP: "https://i.imgur.com/W9OyTMa.png",
+  ENTJ: "https://i.imgur.com/69Yyq5p.png",
+  ENTP: "https://i.imgur.com/k8UjO5l.png",
+  INFJ: "https://i.imgur.com/1UurNcl.png",
+  INFP: "https://i.imgur.com/IGr6bPC.png",
+  ENFJ: "https://i.imgur.com/UDNLhdY.png",
+  ENFP: "https://i.imgur.com/zqA8XjC.png",
+  ISTJ: "https://i.imgur.com/LmXGRgB.png",
+  ISFJ: "https://i.imgur.com/I79bBbR.png",
+  ESTJ: "https://i.imgur.com/XPmN48c.png",
+  ESFJ: "https://i.imgur.com/ZanivVw.png",
+  ISTP: "https://i.imgur.com/5plEkU5.png",
+  ISFP: "https://i.imgur.com/rcZGjyc.png",
+  ESTP: "https://i.imgur.com/IWyo4u3.png",
+  ESFP: "https://i.imgur.com/rOSD4fW.png"
+};
 
-    const pageTitle = document.getElementById('pageTitle');
-    const mainTitle = document.getElementById('mainTitle');
-    const submitBtn = document.getElementById('submitBtn');
-    const resultTitle = document.getElementById('resultTitle');
-    const questionElements = document.querySelectorAll('#quiz > div');
+const questions = [
+  {
+    text: "你獨自被困在極寒雪地，第一件事？",
+    options: [
+      { text: "冷靜觀察環境，找資源。", type: "I" },
+      { text: "呼救、嘗試聯繫外界。", type: "E" },
+      { text: "先睡一覺冷靜。", type: "I" }
+    ]
+  },
+  {
+    text: "你會怎麼準備避難所？",
+    options: [
+      { text: "理性評估風向、地形後建設。", type: "T" },
+      { text: "考量舒適與安全平衡。", type: "F" },
+      { text: "依直覺搭建，先求有再調整。", type: "F" }
+    ]
+  },
+  {
+    text: "雪越下越大，你...",
+    options: [
+      { text: "分析氣候變化推測時間。", type: "N" },
+      { text: "觀察雪的厚度來判斷。", type: "S" },
+      { text: "跟感覺走。", type: "N" }
+    ]
+  },
+  {
+    text: "是否應該現在生火？",
+    options: [
+      { text: "立即生火保溫。", type: "J" },
+      { text: "先觀察還有多少資源。", type: "P" },
+      { text: "看太陽高度再決定。", type: "J" }
+    ]
+  },
+  {
+    text: "你找到狼留下的腳印…",
+    options: [
+      { text: "追蹤牠可能的路線。", type: "N" },
+      { text: "立刻換方向避開。", type: "S" },
+      { text: "設陷阱準備防禦。", type: "T" }
+    ]
+  }
+];
 
-    function updateContent(lang) {
-      const t = translations[lang];
-      pageTitle.innerText = t.pageTitle;
-      mainTitle.innerText = t.mainTitle;
-      submitBtn.innerText = t.submitBtn;
-      resultTitle.innerText = t.resultTitle;
-      const typeTextElement = document.getElementById('typeText');
-      if (typeTextElement && typeTextElement.innerText.startsWith(translations[currentLanguage].typeTextPrefix)) {
-        typeTextElement.innerText = `${t.typeTextPrefix} ${typeTextElement.innerText.substring(translations[currentLanguage].typeTextPrefix.length).trim()}`;
-      }
+const scores = { I: 0, E: 0, N: 0, S: 0, T: 0, F: 0, J: 0, P: 0 };
 
-      questionElements.forEach((qDiv, i) => {
-        const question = t.questions[i];
-        qDiv.querySelector('p').innerText = `${i + 1}. ${question.text}`;
-        const options = qDiv.querySelectorAll('label');
-        question.options.forEach((optText, j) => {
-          options[j].innerText = optText;
-        });
-      });
-      currentLanguage = lang;
-      document.documentElement.lang = lang; // 更新 HTML 的 lang 屬性
+const quizDiv = document.getElementById("quiz");
+questions.forEach((q, idx) => {
+  const div = document.createElement("div");
+  div.className = "my-4 text-left";
+  div.innerHTML = `<p class="mb-2 font-semibold">${idx + 1}. ${q.text}</p>` +
+    q.options.map((opt, i) => `
+      <label class="block">
+        <input type="radio" name="q${idx}" value="${opt.type}" class="mr-2">
+        ${opt.text}
+      </label>
+    `).join("");
+  quizDiv.appendChild(div);
+});
+
+document.querySelectorAll("input").forEach(input => {
+  input.addEventListener("change", () => {
+    const allAnswered = questions.every((_, i) => document.querySelector(`input[name='q${i}']:checked`));
+    if (allAnswered) {
+      document.getElementById("submitBtn").classList.remove("hidden");
     }
+  });
+});
 
-    document.getElementById('zhBtn').addEventListener('click', () => updateContent('zh'));
-    document.getElementById('enBtn').addEventListener('click', () => updateContent('en'));
+document.getElementById("submitBtn").addEventListener("click", () => {
+  Object.keys(scores).forEach(k => scores[k] = 0);
+  questions.forEach((_, i) => {
+    const ans = document.querySelector(`input[name='q${i}']:checked`).value;
+    scores[ans]++;
+  });
 
-    // 頁面載入時更新一次內容
-    updateContent(currentLanguage);
+  const mbti = `${scores["I"] > scores["E"] ? "I" : "E"}${scores["N"] > scores["S"] ? "N" : "S"}${scores["T"] > scores["F"] ? "T" : "F"}${scores["J"] > scores["P"] ? "J" : "P"}`;
 
-    const questions = [ /* ... (你的原始問題陣列) ... */ ];
-    const quizDiv = document.getElementById('quiz');
-    const resultDiv = document.getElementById('result');
-    const typeText = document.getElementById('typeText');
-    const scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+  document.getElementById("result").classList.remove("hidden");
+  document.getElementById("typeText").innerText = `你的 MBTI 類型是：${mbti}`;
 
-    questions.forEach((q, i) => {
-      const qDiv = document.createElement('div');
-      qDiv.className = 'mb-4';
-      qDiv.innerHTML = `<p class="font-semibold">${i + 1}. ${q.text}</p>`;
-      q.options.forEach((opt, j) => {
-        const id = `q${i}_opt${j}`;
-        qDiv.innerHTML += `
-          <div>
-            <input type="radio" name="q${i}" id="${id}" value="${j}" class="mr-2">
-            <label for="${id}">${opt.text}</label>
-          </div>`;
-      });
-      quizDiv.appendChild(qDiv);
-    });
-
-    quizDiv.addEventListener('change', () => {
-      const allAnswered = questions.every((_, i) => {
-        return document.querySelector(`input[name='q${i}']:checked`);
-      });
-      submitBtn.classList.toggle('hidden', !allAnswered);
-    });
-
-    submitBtn.addEventListener('click', () => {
-      questions.forEach((q, i) => {
-        const choice = document.querySelector(`input[name='q${i}']:checked`).value;
-        const scoreObj = q.options[choice].score;
-        for (const key in scoreObj) {
-          scores[key] += scoreObj[key];
+  const ctx = document.getElementById("radarChart").getContext("2d");
+  new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['I/E', 'N/S', 'T/F', 'J/P'],
+      datasets: [{
+        label: '傾向分數',
+        data: [
+          scores["I"] - scores["E"],
+          scores["N"] - scores["S"],
+          scores["T"] - scores["F"],
+          scores["J"] - scores["P"]
+        ],
+        backgroundColor: 'rgba(59, 130, 246, 0.3)',
+        borderColor: 'rgba(59, 130, 246, 1)',
+        pointBackgroundColor: 'rgba(59, 130, 246, 1)'
+      }]
+    },
+    options: {
+      scales: {
+        r: {
+          min: -3,
+          max: 3,
+          ticks: { stepSize: 1 }
         }
-      });
+      }
+    }
+  });
 
-      const labels = ['E/I', 'S/N', 'T/F', 'J/P'];
-      const radarData = {
-        labels,
-        datasets: [{
-          label: translations[currentLanguage].resultTitle.split(' ')[0], // 使用翻譯後的標題的一部分
-          data: [
-            scores.E - scores.I,
-            scores.S - scores.N,
-            scores.T - scores.F,
-            scores.J - scores.P
-          ].map(x => (x + 3) * 10), // shift for chart display
-          backgroundColor: 'rgba(173, 216, 230, 0.4)', // 淺藍色
-          borderColor: 'rgba(173, 216, 230, 1)',
-          borderWidth: 2
-        }]
-      };
-
-      new Chart(document.getElementById('radarChart'), {
-        type: 'radar',
-        data: radarData,
-        options: {
-          scales: {
-            r: {
-              suggestedMin: 0,
-              suggestedMax: 60,
-              ticks: {
-                backdropColor: 'rgba(255, 255, 255, 0.7)',
-                color: '#333'
-              },
-              grid: {
-                color: 'rgba(0, 0, 0, 0.1)'
-              },
-              pointLabels: {
-                color: '#333'
-              }
-            }
-          },
-          elements: {
-            line: {
-              tension: 0.2,
-              borderColor: 'rgba(173, 216, 230, 1)',
-              borderWidth: 2
-            },
-            point: {
-              radius: 4,
-              backgroundColor: 'rgba(173, 216, 230, 1)',
-              borderColor: '#fff',
-              borderWidth: 1
-            }
-          }
-        }
-      });
-
-      const type = `${scores.I > scores.E ? 'I' : 'E'}${scores.S > scores.N ? 'S' : 'N'}${scores.T > scores.F ? 'T' : 'F'}${scores.J > scores.P ? 'J' : 'P'}`;
-      typeText.innerText = `${translations[currentLanguage].typeTextPrefix} ${type}`;
-
-      resultDiv.classList.remove('hidden');
-      submitBtn.disabled = true;
-    });
-  </script>
+  document.getElementById("mbtiImage").innerHTML = `
+    <p class="mt-4">代表人物：</p>
+    <img src="${mbtiMap[mbti]}" class="mbti-img mx-auto mt-2">
+  `;
+});
+</script>
 </body>
 </html>
