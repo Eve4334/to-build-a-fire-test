@@ -94,7 +94,6 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     const snowContainer = document.getElementById('snow-container');
     const snowflakeCount = 40;
@@ -138,25 +137,24 @@
         ]
       },
       {
-  text: "手指凍傷幾乎不能動，你會？",
-  options: [
-    { text: "咬牙繼續嘗試升火，我不能停下", score: { T: 1, J: 1 } },
-    { text: "坐下來保存體力，想著自己過去的人生", score: { I: 1, N: 1 } },
-    { text: "嘗試用嘴或其他部位取代雙手動作", score: { S: 1, P: 1 } },
-    { text: "大喊發洩情緒，希望釋放壓力", score: { E: 1, F: 1 } }
-  ]
-}
-
+        text: "手指凍傷幾乎不能動，你會？",
+        options: [
+          { text: "咬牙繼續嘗試升火，我不能停下", score: { T: 1, J: 1 } },
+          { text: "坐下來保存體力，想著自己過去的人生", score: { I: 1, N: 1 } },
+          { text: "嘗試用嘴或其他部位取代雙手動作", score: { S: 1, P: 1 } },
+          { text: "大喊發洩情緒，希望釋放壓力", score: { E: 1, F: 1 } }
+        ]
+      },
       {
-  text: "你沒有任何的火柴能夠點火了，你會？",
-  options: [
-    { text: "放下一切靜靜等待，也許是命運的安排", score: { I: 1, N: 1 } },
-    { text: "抱住狗，試圖從牠身上取暖", score: { F: 1, S: 1 } },
-    { text: "盡最後一絲力氣繼續前進", score: { T: 1, J: 1 } },
-    { text: "試圖找出能發出訊號的東西求救", score: { E: 1, P: 1 } }
-  ]
-}
-
+        text: "你沒有任何的火柴能夠點火了，你會？",
+        options: [
+          { text: "放下一切靜靜等待，也許是命運的安排", score: { I: 1, N: 1 } },
+          { text: "抱住狗，試圖從牠身上取暖", score: { F: 1, S: 1 } },
+          { text: "盡最後一絲力氣繼續前進", score: { T: 1, J: 1 } },
+          { text: "試圖找出能發出訊號的東西求救", score: { E: 1, P: 1 } }
+        ]
+      }
+    ];
 
     const quizDiv = document.getElementById('quiz');
     const submitBtn = document.getElementById('submitBtn');
@@ -210,7 +208,6 @@
     }
 
     submitBtn.onclick = () => {
-      // 顯示結果
       showResult();
     };
 
@@ -236,12 +233,12 @@
             scores.P
           ],
           fill: true,
-          backgroundColor: 'rgba(32, 137, 220, 0.2)',
-          borderColor: '#2091dc',
-          pointBackgroundColor: '#2091dc',
+          backgroundColor: 'rgba(255, 182, 193, 0.3)',
+          borderColor: '#ff69b4',
+          pointBackgroundColor: '#ff69b4',
           pointBorderColor: '#fff',
           pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: '#2091dc',
+          pointHoverBorderColor: '#ff69b4',
           tension: 0.3,
           borderWidth: 2,
         }]
@@ -278,80 +275,80 @@
       const personalityMap = {
         'ISTJ': {
           type: '謹慎型守護者',
-          desc: '踏實穩重，注重責任與傳統，靠計劃與紀律面對挑戰。'
+          desc: '踏實穩重，注重責任與傳統，靠計劃行事。'
         },
         'ISFJ': {
-          type: '謹慎型守護者',
-          desc: '細心溫和，重視他人需要，默默付出維護安全。'
+          type: '溫暖的守護者',
+          desc: '細心體貼，樂於助人，重視安全與和諧。'
         },
         'INFJ': {
-          type: '謹慎型理想主義者',
-          desc: '富有遠見且深思熟慮，憑直覺與同理心引領方向。'
+          type: '富有洞察力的理想主義者',
+          desc: '深思熟慮，有遠見，追求內在價值與意義。'
         },
         'INTJ': {
-          type: '謹慎型策略家',
-          desc: '冷靜理性，擅長規劃與分析，喜歡掌控全局。'
+          type: '策略型規劃者',
+          desc: '獨立且理性，善於分析和長期規劃。'
         },
         'ISTP': {
-          type: '冒險型實踐者',
-          desc: '靈活務實，喜歡動手解決問題，面對危機冷靜。'
+          type: '務實的冒險家',
+          desc: '靈活且獨立，善於解決問題與應對突發狀況。'
         },
         'ISFP': {
-          type: '冒險型生存者',
-          desc: '隨和自由，注重當下感受，擅長應對突發狀況。'
+          type: '審美型藝術家',
+          desc: '溫和且謙遜，注重當下和諧與美感。'
         },
         'INFP': {
-          type: '謹慎型夢想家',
-          desc: '理想主義者，情感豐富，尋找生命意義與價值。'
+          type: '理想主義者',
+          desc: '理想主義且忠誠，追求內心的和諧與意義。'
         },
         'INTP': {
-          type: '謹慎型思考者',
-          desc: '冷靜理性，善於分析與獨立思考，喜歡探究真理。'
+          type: '思考者',
+          desc: '分析力強，追求知識與理論的完美。'
         },
         'ESTP': {
-          type: '冒險型挑戰者',
-          desc: '果斷行動派，喜歡刺激與冒險，反應敏捷。'
+          type: '活力十足的實踐者',
+          desc: '愛冒險且社交，喜歡即時行動與挑戰。'
         },
         'ESFP': {
-          type: '冒險型生存者',
-          desc: '活力充沛，喜歡嘗試新事物，適應能力強。'
+          type: '熱情的表演者',
+          desc: '外向且開朗，享受生活與人際互動。'
         },
         'ENFP': {
-          type: '冒險型激勵者',
-          desc: '充滿熱情與創意，善於激發他人與自己。'
+          type: '充滿熱忱的倡導者',
+          desc: '創造力豐富，熱愛自由與人際連結。'
         },
         'ENTP': {
-          type: '冒險型探索者',
-          desc: '思維靈活，喜歡創新與解決問題，敢於冒險。'
+          type: '機智的辯論者',
+          desc: '靈活且善於辯論，喜歡挑戰傳統。'
         },
         'ESTJ': {
-          type: '謹慎型守護者',
-          desc: '腳踏實地，注重計劃與責任，是團隊中可靠力量。'
+          type: '實幹的管理者',
+          desc: '有組織力，注重秩序與效率。'
         },
         'ESFJ': {
-          type: '謹慎型照顧者',
-          desc: '熱心助人，善於組織與維持和諧關係。'
+          type: '溫暖的協調者',
+          desc: '關懷他人，擅長維護和諧與合作。'
         },
         'ENFJ': {
-          type: '謹慎型領導者',
-          desc: '善於溝通與激勵，具備強大影響力與責任感。'
+          type: '有魅力的領導者',
+          desc: '善於激勵他人，重視社群與理想。'
         },
         'ENTJ': {
-          type: '謹慎型指揮官',
-          desc: '果斷領導者，善於規劃與執行宏大計畫。'
+          type: '果斷的指揮官',
+          desc: '領導力強，善於策略規劃與執行。'
         }
       };
 
-      const result = personalityMap[mbti] || {
-        type: '多面向求生者',
-        desc: '你的個性融合多種特質，具有獨特的求生能力。'
-      };
-
-      typeText.textContent = `${mbti} - ${result.type}`;
-      descText.textContent = result.desc;
-    }
+      const p = personalityMap[mbti] || {type: '未知類型', desc: '無對應描述'};
+      typeText.textContent = `你的 MBTI 類型是：${mbti} — ${p.type}`;
+      descText.textContent = p.desc;
+    };
 
     renderQuestion(0);
+  </script>
+</body>
+</html>
+
   </script>
 </body>
 </html>
