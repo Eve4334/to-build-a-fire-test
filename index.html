@@ -228,22 +228,41 @@
         }
       });
 
-      const type = `${scores.I > scores.E ? 'I' : 'E'}${scores.S > scores.N ? 'S' : 'N'}${scores.T > scores.F ? 'T' : 'F'}${scores.J > scores.P ? 'J' : 'P'}`;
-      let personality = '';
-      // 根據 MBTI 類型給予冒險型或保守型的標籤
-      if (type === 'ESTP' || type === 'ENTP' || type === 'ENFP') {
-        personality = '冒險型';
-      } else if (type === 'ISTJ' || type === 'ISFJ' || type === 'INFJ') {
-        personality = '保守型';
-      } else {
-        personality = '平衡型';
-      }
+     const type = `${scores.I > scores.E ? 'I' : 'E'}${scores.S > scores.N ? 'S' : 'N'}${scores.T > scores.F ? 'T' : 'F'}${scores.J > scores.P ? 'J' : 'P'}`;
 
-      typeText.innerText = `你的 MBTI 傾向是 ${type}，屬於 ${personality}`;
+let style = '';
+if (type[0] === 'E' && type[3] === 'P') {
+  style = '🧭 冒險型生存者：你勇於行動、適應力強，面對極端環境也不輕言放棄。';
+} else if (type[0] === 'I' && type[3] === 'J') {
+  style = '🔍 謹慎型規劃者：你喜歡計畫周全，穩扎穩打，遇到困境也會冷靜分析。';
+} else if (type[2] === 'T' && type[3] === 'J') {
+  style = '🔥 堅毅型求生者：你邏輯清晰、有執行力，是危機中值得信賴的領導者。';
+} else if (type[2] === 'F') {
+  style = '🌲 感性型倖存者：你重視情感與直覺，雖可能不夠理性，但你的人性光輝常成為關鍵。';
+} else {
+  style = '❓ 多面向的生存者：你具有多元的適應方式，或許能在意想不到的情境中活下來。';
+}
+
+typeText.innerText = `你的 MBTI 傾向是 ${type}\n${style}`;
+
 
       resultDiv.classList.remove('hidden');
       submitBtn.disabled = true;
     });
+    <script>
+  const colors = ['#e0f7fa', '#b3e5fc', '#81d4fa', '#4fc3f7', '#29b6f6'];
+  for(let i=0; i<50; i++) {
+    const snowflake = document.createElement('div');
+    snowflake.classList.add('snowflake');
+    snowflake.style.left = Math.random() * 100 + 'vw';
+    snowflake.style.animationDuration = (5 + Math.random() * 10) + 's';
+    snowflake.style.fontSize = (10 + Math.random() * 15) + 'px';
+    snowflake.style.opacity = Math.random();
+    snowflake.style.animationDelay = (Math.random() * 20) + 's';
+    snowflake.style.color = colors[Math.floor(Math.random() * colors.length)];
+    snowflake.textContent = '❄';
+    document.body.appendChild(snowflake);
+  }
   </script>
 </body>
 </html>
