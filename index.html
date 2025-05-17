@@ -1,165 +1,119 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>你能在零下50度中活下來嗎？</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* 冰藍漸層背景 */
     body {
-      background: linear-gradient(135deg, #d0e7f9 0%, #a4c8f0 70%, #5a8fd6 100%);
-      position: relative;
-      overflow-x: hidden;
+      background: linear-gradient(to bottom, #cfe5f5, #e0f7fa);
+      background-image: url('https://images.unsplash.com/photo-1608889175763-929dbf8dfe68?auto=format&fit=crop&w=1470&q=80');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
     }
-    /* 雪花動畫 */
-    @keyframes snowFall {
-      0% {
-        transform: translateY(-10px) translateX(0);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(110vh) translateX(20px);
-        opacity: 0;
-      }
-    }
-    .snowflake {
+    .snow {
       position: fixed;
-      top: -10px;
-      color: #fff;
-      font-size: 1.5rem;
-      user-select: none;
+      width: 100%;
+      height: 100%;
       pointer-events: none;
-      animation-name: snowFall;
-      animation-timing-function: linear;
-      animation-iteration-count: infinite;
-      z-index: 9999;
-    }
-    /* 問題卡片風格 */
-    #quiz > div {
-      background: rgba(255 255 255 / 0.15);
-      border-radius: 0.75rem;
-      padding: 1rem 1.5rem;
-      margin-bottom: 1rem;
-      box-shadow: 0 0 15px rgba(255 255 255 / 0.3);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255 255 255 / 0.3);
-      transition: box-shadow 0.3s ease;
-    }
-    #quiz > div:hover {
-      box-shadow: 0 0 25px rgba(255 255 255 / 0.6);
-    }
-    /* 按鈕冰藍風格 */
-    #submitBtn {
-      background: linear-gradient(135deg, #6cb4ee, #3b82f6);
-      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.5);
-      transition: background 0.3s ease, box-shadow 0.3s ease;
-    }
-    #submitBtn:hover {
-      background: linear-gradient(135deg, #4a8dde, #2563eb);
-      box-shadow: 0 6px 25px rgba(37, 99, 235, 0.8);
-    }
-    #submitBtn:disabled {
-      background: #93c5fd;
-      box-shadow: none;
-      cursor: not-allowed;
-    }
-    /* 結果區域字體顏色偏冷 */
-    #result h2,
-    #result p {
-      color: #e0f2fe;
-      text-shadow: 0 0 5px #3b82f6;
+      z-index: 0;
     }
   </style>
 </head>
-<body class="font-sans text-white relative min-h-screen overflow-x-hidden">
-  <div class="max-w-xl mx-auto p-4">
+<body class="bg-blue-50/80 text-gray-800 font-sans relative">
+  <canvas class="snow"></canvas>
+  <div class="max-w-xl mx-auto p-4 bg-white/80 rounded-xl shadow-lg z-10 relative">
     <h1 class="text-3xl font-bold mb-4 text-center">你能在零下50度中活下來嗎？</h1>
     <div id="quiz"></div>
-    <button id="submitBtn" class="mt-4 px-4 py-2 rounded hover:cursor-pointer hidden">
-      查看結果
-    </button>
+    <button id="submitBtn" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 hidden">查看結果</button>
     <div id="result" class="mt-6 hidden">
       <h2 class="text-2xl font-semibold mb-2">你的求生人格</h2>
       <canvas id="radarChart" width="400" height="400"></canvas>
-      <p id="typeText" class="mt-4 text-lg"></p>
+      <p id="typeText" class="mt-4 text-lg whitespace-pre-line"></p>
     </div>
   </div>
 
   <script>
     const questions = [
       {
-        text: "你發現氣溫已降到零下五十度，你會？",
+        text: "你發現氣溫降到零下50度，獨自一人準備啟程，你會？",
         options: [
-          { text: "按計畫出發，我相信自己判斷", score: { I: 1, T: 1 } },
-          { text: "改變計畫，等有人陪我再出發", score: { F: 1, J: 1 } },
-          { text: "想太多會拖慢進度，先走再說", score: { E: 1, P: 1 } },
-        ],
+          { text: "依照原定計畫出發，相信自己的準備足夠。", score: { I: 1, T: 1 } },
+          { text: "通知朋友後等待夥伴同行。", score: { F: 1, J: 1 } },
+          { text: "直接出發，邊走邊看情況應變。", score: { E: 1, P: 1 } },
+          { text: "覺得這天氣太危險，決定不出發。", score: { I: 1, S: 1 } }
+        ]
       },
       {
-        text: "途中你掉進了冰冷的溪水，你會怎麼辦？",
+        text: "途中你掉進冰水裡，衣服濕透，你會？",
         options: [
-          { text: "找樹下避風處再升火", score: { J: 1, S: 1 } },
-          { text: "立刻原地升火，不能再拖了", score: { P: 1, T: 1 } },
-          { text: "嘗試靠奔跑取暖", score: { E: 1, S: 1 } },
-        ],
+          { text: "尋找風小的地方升火取暖。", score: { J: 1, S: 1 } },
+          { text: "原地立刻升火，時間就是生命。", score: { P: 1, T: 1 } },
+          { text: "靠快速行走和運動取暖。", score: { E: 1, S: 1 } },
+          { text: "回頭找先前見過的庇護處。", score: { I: 1, J: 1 } }
+        ]
       },
       {
-        text: "火被雪熄滅了。你會？",
+        text: "火被雪熄滅了，你冷到發抖，這時你會？",
         options: [
-          { text: "再試一次升火", score: { J: 1, T: 1 } },
-          { text: "尋找狗，希望靠牠保暖", score: { F: 1, S: 1 } },
-          { text: "感到絕望，想著自己快撐不下去了", score: { N: 1, I: 1 } },
-        ],
+          { text: "堅持再試一次升火。", score: { J: 1, T: 1 } },
+          { text: "快速檢查是否有其他保暖物資。", score: { S: 1, T: 1 } },
+          { text: "回憶溫暖的記憶，希望振作起來。", score: { N: 1, I: 1 } },
+          { text: "呼喚遠方的狗，希望牠能幫你取暖。", score: { F: 1, N: 1 } }
+        ]
       },
       {
-        text: "手指凍傷幾乎不能動，你？",
+        text: "你的手已幾乎凍傷，無法靈活活動，你？",
         options: [
-          { text: "咬牙堅持嘗試升火", score: { T: 1, J: 1 } },
-          { text: "開始回想人生，準備面對死亡", score: { N: 1, I: 1 } },
-          { text: "怒吼奔跑發洩情緒", score: { E: 1, F: 1 } },
-        ],
+          { text: "用牙齒試圖點火，堅持到底。", score: { T: 1, J: 1 } },
+          { text: "憑意志力回顧人生過往，希望平靜接受。", score: { N: 1, I: 1 } },
+          { text: "大叫並奔跑，希望身體暖起來。", score: { E: 1, F: 1 } },
+          { text: "改變計畫，找最近的安全地點求援。", score: { S: 1, P: 1 } }
+        ]
       },
       {
-        text: "最後一次選擇機會，你會？",
+        text: "你明白這可能是最後一次機會，你會？",
         options: [
-          { text: "放下一切靜靜等待", score: { I: 1, N: 1 } },
-          { text: "抱住狗，試圖從牠身上取暖", score: { F: 1, S: 1 } },
-          { text: "盡最後一絲力氣繼續前進", score: { T: 1, J: 1 } },
-        ],
-      },
+          { text: "靜靜等待，希望有人經過救你。", score: { I: 1, N: 1 } },
+          { text: "再次點火，咬牙撐下去。", score: { T: 1, J: 1 } },
+          { text: "靠近動物或任何熱源取暖。", score: { F: 1, S: 1 } },
+          { text: "一步步前進，哪怕只剩最後一絲力氣。", score: { E: 1, P: 1 } }
+        ]
+      }
     ];
 
-    const quizDiv = document.getElementById("quiz");
-    const submitBtn = document.getElementById("submitBtn");
-    const resultDiv = document.getElementById("result");
-    const typeText = document.getElementById("typeText");
+    const quizDiv = document.getElementById('quiz');
+    const submitBtn = document.getElementById('submitBtn');
+    const resultDiv = document.getElementById('result');
+    const typeText = document.getElementById('typeText');
     const scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
 
     questions.forEach((q, i) => {
-      const qDiv = document.createElement("div");
-      qDiv.className = "mb-4";
+      const qDiv = document.createElement('div');
+      qDiv.className = 'mb-4';
       qDiv.innerHTML = `<p class="font-semibold">${i + 1}. ${q.text}</p>`;
       q.options.forEach((opt, j) => {
         const id = `q${i}_opt${j}`;
         qDiv.innerHTML += `
           <div>
-            <input type="radio" name="q${i}" id="${id}" value="${j}" class="mr-2" />
+            <input type="radio" name="q${i}" id="${id}" value="${j}" class="mr-2">
             <label for="${id}">${opt.text}</label>
           </div>`;
       });
       quizDiv.appendChild(qDiv);
     });
 
-    quizDiv.addEventListener("change", () => {
+    quizDiv.addEventListener('change', () => {
       const allAnswered = questions.every((_, i) => {
         return document.querySelector(`input[name='q${i}']:checked`);
       });
-      submitBtn.classList.toggle("hidden", !allAnswered);
+      submitBtn.classList.toggle('hidden', !allAnswered);
     });
 
-    submitBtn.addEventListener("click", () => {
+    submitBtn.addEventListener('click', () => {
       questions.forEach((q, i) => {
         const choice = document.querySelector(`input[name='q${i}']:checked`).value;
         const scoreObj = q.options[choice].score;
@@ -168,60 +122,107 @@
         }
       });
 
-      const labels = ["E/I", "S/N", "T/F", "J/P"];
+      const labels = ['E/I', 'S/N', 'T/F', 'J/P'];
       const radarData = {
         labels,
-        datasets: [
-          {
-            label: "MBTI 傾向",
-            data: [scores.E - scores.I, scores.S - scores.N, scores.T - scores.F, scores.J - scores.P].map(
-              (x) => (x + 3) * 10
-            ), // shift for chart display
-            backgroundColor: "rgba(59, 130, 246, 0.2)",
-            borderColor: "rgba(59, 130, 246, 1)",
-            borderWidth: 2,
-          },
-        ],
+        datasets: [{
+          label: 'MBTI 傾向',
+          data: [
+            scores.E - scores.I,
+            scores.S - scores.N,
+            scores.T - scores.F,
+            scores.J - scores.P
+          ].map(x => (x + 3) * 10),
+          backgroundColor: 'rgba(59, 130, 246, 0.2)',
+          borderColor: 'rgba(59, 130, 246, 1)',
+          borderWidth: 2
+        }]
       };
 
-      new Chart(document.getElementById("radarChart"), {
-        type: "radar",
+      new Chart(document.getElementById('radarChart'), {
+        type: 'radar',
         data: radarData,
         options: {
           scales: {
             r: {
               suggestedMin: 0,
-              suggestedMax: 60,
-            },
-          },
-        },
+              suggestedMax: 60
+            }
+          }
+        }
       });
 
-      const type = `${scores.I > scores.E ? "I" : "E"}${scores.S > scores.N ? "S" : "N"}${scores.T > scores.F ? "T" : "F"}${
-        scores.J > scores.P ? "J" : "P"
-      }`;
-      typeText.innerText = `你的 MBTI 傾向是 ${type}`;
+      const type = `${scores.I > scores.E ? 'I' : 'E'}${scores.S > scores.N ? 'S' : 'N'}${scores.T > scores.F ? 'T' : 'F'}${scores.J > scores.P ? 'J' : 'P'}`;
+      let style = '';
+      if (type[0] === 'E' && type[3] === 'P') {
+        style = '🧭 冒險型生存者：你勇於行動、適應力強，面對極端環境也不輕言放棄。';
+      } else if (type[0] === 'I' && type[3] === 'J') {
+        style = '🔍 謹慎型規劃者：你喜歡計畫周全，穩扎穩打，遇到困境也會冷靜分析。';
+      } else if (type[2] === 'T' && type[3] === 'J') {
+        style = '🔥 堅毅型求生者：你邏輯清晰、有執行力，是危機中值得信賴的領導者。';
+      } else if (type[2] === 'F') {
+        style = '🌲 感性型倖存者：你重視情感與直覺，雖可能不夠理性，但你的人性光輝常成為關鍵。';
+      } else {
+        style = '❓ 多面向的生存者：你具有多元的適應方式，或許能在意想不到的情境中活下來。';
+      }
+      typeText.innerText = `你的 MBTI 傾向是 ${type}\n${style}`;
 
-      resultDiv.classList.remove("hidden");
+      resultDiv.classList.remove('hidden');
       submitBtn.disabled = true;
     });
   </script>
 
   <script>
-    // 雪花產生器
-    const colors = ["#e0f7fa", "#b3e5fc", "#81d4fa", "#4fc3f7", "#29b6f6"];
-    for (let i = 0; i < 50; i++) {
-      const snowflake = document.createElement("div");
-      snowflake.classList.add("snowflake");
-      snowflake.style.left = Math.random() * 100 + "vw";
-      snowflake.style.animationDuration = 5 + Math.random() * 10 + "s";
-      snowflake.style.fontSize = 10 + Math.random() * 15 + "px";
-      snowflake.style.opacity = Math.random();
-      snowflake.style.animationDelay = Math.random() * 20 + "s";
-      snowflake.style.color = colors[Math.floor(Math.random() * colors.length)];
-      snowflake.textContent = "❄";
-      document.body.appendChild(snowflake);
+    // 下雪動畫
+    const canvas = document.querySelector('.snow');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let snowflakes = [];
+
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
     }
+
+    function createSnowflakes() {
+      const x = Math.random() * width;
+      const y = Math.random() * height;
+      const radius = Math.random() * 4 + 1;
+      const speed = Math.random() * 1 + 0.5;
+      snowflakes.push({ x, y, radius, speed });
+    }
+
+    function drawSnowflakes() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      for (const flake of snowflakes) {
+        ctx.moveTo(flake.x, flake.y);
+        ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
+      }
+      ctx.fill();
+      updateSnowflakes();
+    }
+
+    function updateSnowflakes() {
+      for (const flake of snowflakes) {
+        flake.y += flake.speed;
+        if (flake.y > height) {
+          flake.y = -flake.radius;
+          flake.x = Math.random() * width;
+        }
+      }
+    }
+
+    function loop() {
+      drawSnowflakes();
+      requestAnimationFrame(loop);
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    setInterval(createSnowflakes, 100);
+    loop();
   </script>
 </body>
 </html>
