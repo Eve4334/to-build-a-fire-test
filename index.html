@@ -1,16 +1,227 @@
-
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <title>To Build a Fire：極地環境下看你的性格</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>你能在零下50度中活下來嗎？</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* 冰藍漸層背景 */
+    body {
+      background: linear-gradient(135deg, #d0e7f9 0%, #a4c8f0 70%, #5a8fd6 100%);
+      position: relative;
+      overflow-x: hidden;
+    }
+    /* 雪花動畫 */
+    @keyframes snowFall {
+      0% {
+        transform: translateY(-10px) translateX(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(110vh) translateX(20px);
+        opacity: 0;
+      }
+    }
+    .snowflake {
+      position: fixed;
+      top: -10px;
+      color: #fff;
+      font-size: 1.5rem;
+      user-select: none;
+      pointer-events: none;
+      animation-name: snowFall;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      z-index: 9999;
+    }
+    /* 問題卡片風格 */
+    #quiz > div {
+      background: rgba(255 255 255 / 0.15);
+      border-radius: 0.75rem;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 0 15px rgba(255 255 255 / 0.3);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255 255 255 / 0.3);
+      transition: box-shadow 0.3s ease;
+    }
+    #quiz > div:hover {
+      box-shadow: 0 0 25px rgba(255 255 255 / 0.6);
+    }
+    /* 按鈕冰藍風格 */
+    #submitBtn {
+      background: linear-gradient(135deg, #6cb4ee, #3b82f6);
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.5);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+    #submitBtn:hover {
+      background: linear-gradient(135deg, #4a8dde, #2563eb);
+      box-shadow: 0 6px 25px rgba(37, 99, 235, 0.8);
+    }
+    #submitBtn:disabled {
+      background: #93c5fd;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+    /* 結果區域字體顏色偏冷 */
+    #result h2,
+    #result p {
+      color: #e0f2fe;
+      text-shadow: 0 0 5px #3b82f6;
+    }
+  </style>
 </head>
-<body>
-  <div id="app">
-    <h1>To Build a Fire：極地環境下看你的性格</h1>
-    <!-- 題目、選項、動畫、結果等會透過 JS 插入 -->
+<body class="font-sans text-white relative min-h-screen overflow-x-hidden">
+  <div class="max-w-xl mx-auto p-4">
+    <h1 class="text-3xl font-bold mb-4 text-center">你能在零下50度中活下來嗎？</h1>
+    <div id="quiz"></div>
+    <button id="submitBtn" class="mt-4 px-4 py-2 rounded hover:cursor-pointer hidden">
+      查看結果
+    </button>
+    <div id="result" class="mt-6 hidden">
+      <h2 class="text-2xl font-semibold mb-2">你的求生人格</h2>
+      <canvas id="radarChart" width="400" height="400"></canvas>
+      <p id="typeText" class="mt-4 text-lg"></p>
+    </div>
   </div>
-  <script src="js/main.js"></script>
+
+  <script>
+    const questions = [
+      {
+        text: "你發現氣溫已降到零下五十度，你會？",
+        options: [
+          { text: "按計畫出發，我相信自己判斷", score: { I: 1, T: 1 } },
+          { text: "改變計畫，等有人陪我再出發", score: { F: 1, J: 1 } },
+          { text: "想太多會拖慢進度，先走再說", score: { E: 1, P: 1 } },
+        ],
+      },
+      {
+        text: "途中你掉進了冰冷的溪水，你會怎麼辦？",
+        options: [
+          { text: "找樹下避風處再升火", score: { J: 1, S: 1 } },
+          { text: "立刻原地升火，不能再拖了", score: { P: 1, T: 1 } },
+          { text: "嘗試靠奔跑取暖", score: { E: 1, S: 1 } },
+        ],
+      },
+      {
+        text: "火被雪熄滅了。你會？",
+        options: [
+          { text: "再試一次升火", score: { J: 1, T: 1 } },
+          { text: "尋找狗，希望靠牠保暖", score: { F: 1, S: 1 } },
+          { text: "感到絕望，想著自己快撐不下去了", score: { N: 1, I: 1 } },
+        ],
+      },
+      {
+        text: "手指凍傷幾乎不能動，你？",
+        options: [
+          { text: "咬牙堅持嘗試升火", score: { T: 1, J: 1 } },
+          { text: "開始回想人生，準備面對死亡", score: { N: 1, I: 1 } },
+          { text: "怒吼奔跑發洩情緒", score: { E: 1, F: 1 } },
+        ],
+      },
+      {
+        text: "最後一次選擇機會，你會？",
+        options: [
+          { text: "放下一切靜靜等待", score: { I: 1, N: 1 } },
+          { text: "抱住狗，試圖從牠身上取暖", score: { F: 1, S: 1 } },
+          { text: "盡最後一絲力氣繼續前進", score: { T: 1, J: 1 } },
+        ],
+      },
+    ];
+
+    const quizDiv = document.getElementById("quiz");
+    const submitBtn = document.getElementById("submitBtn");
+    const resultDiv = document.getElementById("result");
+    const typeText = document.getElementById("typeText");
+    const scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+
+    questions.forEach((q, i) => {
+      const qDiv = document.createElement("div");
+      qDiv.className = "mb-4";
+      qDiv.innerHTML = `<p class="font-semibold">${i + 1}. ${q.text}</p>`;
+      q.options.forEach((opt, j) => {
+        const id = `q${i}_opt${j}`;
+        qDiv.innerHTML += `
+          <div>
+            <input type="radio" name="q${i}" id="${id}" value="${j}" class="mr-2" />
+            <label for="${id}">${opt.text}</label>
+          </div>`;
+      });
+      quizDiv.appendChild(qDiv);
+    });
+
+    quizDiv.addEventListener("change", () => {
+      const allAnswered = questions.every((_, i) => {
+        return document.querySelector(`input[name='q${i}']:checked`);
+      });
+      submitBtn.classList.toggle("hidden", !allAnswered);
+    });
+
+    submitBtn.addEventListener("click", () => {
+      questions.forEach((q, i) => {
+        const choice = document.querySelector(`input[name='q${i}']:checked`).value;
+        const scoreObj = q.options[choice].score;
+        for (const key in scoreObj) {
+          scores[key] += scoreObj[key];
+        }
+      });
+
+      const labels = ["E/I", "S/N", "T/F", "J/P"];
+      const radarData = {
+        labels,
+        datasets: [
+          {
+            label: "MBTI 傾向",
+            data: [scores.E - scores.I, scores.S - scores.N, scores.T - scores.F, scores.J - scores.P].map(
+              (x) => (x + 3) * 10
+            ), // shift for chart display
+            backgroundColor: "rgba(59, 130, 246, 0.2)",
+            borderColor: "rgba(59, 130, 246, 1)",
+            borderWidth: 2,
+          },
+        ],
+      };
+
+      new Chart(document.getElementById("radarChart"), {
+        type: "radar",
+        data: radarData,
+        options: {
+          scales: {
+            r: {
+              suggestedMin: 0,
+              suggestedMax: 60,
+            },
+          },
+        },
+      });
+
+      const type = `${scores.I > scores.E ? "I" : "E"}${scores.S > scores.N ? "S" : "N"}${scores.T > scores.F ? "T" : "F"}${
+        scores.J > scores.P ? "J" : "P"
+      }`;
+      typeText.innerText = `你的 MBTI 傾向是 ${type}`;
+
+      resultDiv.classList.remove("hidden");
+      submitBtn.disabled = true;
+    });
+  </script>
+
+  <script>
+    // 雪花產生器
+    const colors = ["#e0f7fa", "#b3e5fc", "#81d4fa", "#4fc3f7", "#29b6f6"];
+    for (let i = 0; i < 50; i++) {
+      const snowflake = document.createElement("div");
+      snowflake.classList.add("snowflake");
+      snowflake.style.left = Math.random() * 100 + "vw";
+      snowflake.style.animationDuration = 5 + Math.random() * 10 + "s";
+      snowflake.style.fontSize = 10 + Math.random() * 15 + "px";
+      snowflake.style.opacity = Math.random();
+      snowflake.style.animationDelay = Math.random() * 20 + "s";
+      snowflake.style.color = colors[Math.floor(Math.random() * colors.length)];
+      snowflake.textContent = "❄";
+      document.body.appendChild(snowflake);
+    }
+  </script>
 </body>
 </html>
