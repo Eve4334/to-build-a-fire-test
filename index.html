@@ -7,116 +7,136 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* 冰藍漸層背景 */
     body {
-      background: linear-gradient(135deg, #d0e7f9 0%, #a4c8f0 70%, #5a8fd6 100%);
+      background: linear-gradient(135deg, #a8d0ff 0%, #002f52 100%);
+      color: #e0f0ff;
+      font-family: 'Noto Sans TC', sans-serif;
+      min-height: 100vh;
       position: relative;
       overflow-x: hidden;
-    }
-    /* 雪花動畫 */
-    @keyframes snowFall {
-      0% {
-        transform: translateY(-10px) translateX(0);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(110vh) translateX(20px);
-        opacity: 0;
-      }
     }
     .snowflake {
       position: fixed;
       top: -10px;
-      color: #fff;
-      font-size: 1.5rem;
+      color: #d0e7ff;
+      font-size: 1.2rem;
       user-select: none;
       pointer-events: none;
-      animation-name: snowFall;
+      animation-name: fall;
       animation-timing-function: linear;
       animation-iteration-count: infinite;
-      z-index: 9999;
     }
-    /* 問題卡片風格 */
-    #quiz > div {
+    @keyframes fall {
+      0% { transform: translateY(0) translateX(0); opacity: 1; }
+      100% { transform: translateY(100vh) translateX(20px); opacity: 0; }
+    }
+    .frost-card {
       background: rgba(255 255 255 / 0.15);
-      border-radius: 0.75rem;
-      padding: 1rem 1.5rem;
-      margin-bottom: 1rem;
-      box-shadow: 0 0 15px rgba(255 255 255 / 0.3);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255 255 255 / 0.3);
-      transition: box-shadow 0.3s ease;
+      backdrop-filter: blur(8px);
+      border-radius: 16px;
+      box-shadow: 0 0 15px rgba(255 255 255 / 0.25);
+      padding: 20px;
     }
-    #quiz > div:hover {
-      box-shadow: 0 0 25px rgba(255 255 255 / 0.6);
+    .btn-ice {
+      background: linear-gradient(135deg, #4fc3f7, #0288d1);
+      box-shadow: 0 4px 15px rgba(4, 121, 197, 0.6);
+      color: white;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      user-select: none;
     }
-    /* 按鈕冰藍風格 */
-    #submitBtn {
-      background: linear-gradient(135deg, #6cb4ee, #3b82f6);
-      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.5);
-      transition: background 0.3s ease, box-shadow 0.3s ease;
+    .btn-ice:hover {
+      background: linear-gradient(135deg, #6dd5fa, #0d47a1);
+      box-shadow: 0 6px 20px rgba(4, 121, 197, 0.8);
+      transform: scale(1.05);
     }
-    #submitBtn:hover {
-      background: linear-gradient(135deg, #4a8dde, #2563eb);
-      box-shadow: 0 6px 25px rgba(37, 99, 235, 0.8);
+    .btn-ice:active {
+      animation: crack 0.4s ease forwards;
     }
-    #submitBtn:disabled {
-      background: #93c5fd;
-      box-shadow: none;
-      cursor: not-allowed;
-    }
-    /* 結果區域字體顏色偏冷 */
-    #result h2,
-    #result p {
-      color: #e0f2fe;
-      text-shadow: 0 0 5px #3b82f6;
+    @keyframes crack {
+      0% {
+        box-shadow: 0 0 15px #a0e9ff;
+        transform: scale(1);
+        filter: brightness(1);
+      }
+      50% {
+        box-shadow:
+          0 0 10px #a0e9ff,
+          0 0 20px #00bfff,
+          0 0 40px #00f0ff;
+        filter: brightness(1.3);
+        transform: scale(1.1);
+      }
+      100% {
+        box-shadow: none;
+        filter: brightness(1);
+        transform: scale(1);
+      }
     }
   </style>
 </head>
-<body class="font-sans text-white relative min-h-screen overflow-x-hidden">
-  <div class="max-w-xl mx-auto p-4">
-    <h1 class="text-3xl font-bold mb-4 text-center">你能在零下50度中活下來嗎？</h1>
+<body>
+  <div id="snow-container"></div>
+
+  <div class="max-w-xl mx-auto p-6 frost-card mt-10">
+    <h1 class="text-4xl font-bold mb-6 text-center drop-shadow-lg">你能在零下50度中活下來嗎？</h1>
+
     <div id="quiz"></div>
-    <button id="submitBtn" class="mt-4 px-4 py-2 rounded hover:cursor-pointer hidden">
-      查看結果
-    </button>
-    <div id="result" class="mt-6 hidden">
-      <h2 class="text-2xl font-semibold mb-2">你的求生人格</h2>
-      <canvas id="radarChart" width="400" height="400"></canvas>
-      <p id="typeText" class="mt-4 text-lg"></p>
+
+    <button id="submitBtn" class="btn-ice px-5 py-3 mt-4 w-full hidden">查看結果</button>
+
+    <div id="result" class="mt-8 hidden text-white text-center">
+      <h2 class="text-3xl font-semibold mb-4 drop-shadow-lg">你的求生人格</h2>
+      <canvas id="radarChart" width="300" height="300"></canvas>
+      <p id="typeText" class="mt-5 text-xl font-medium max-w-lg mx-auto"></p>
+      <p id="descText" class="mt-4 max-w-lg mx-auto leading-relaxed text-blue-200"></p>
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
+    const snowContainer = document.getElementById('snow-container');
+    const snowflakeCount = 40;
+    for(let i=0; i<snowflakeCount; i++){
+      const snowflake = document.createElement('div');
+      snowflake.className = 'snowflake';
+      snowflake.style.left = Math.random() * 100 + 'vw';
+      snowflake.style.animationDuration = (5 + Math.random()*5) + 's';
+      snowflake.style.fontSize = (10 + Math.random()*10) + 'px';
+      snowflake.style.opacity = Math.random();
+      snowflake.innerText = '❄';
+      snowContainer.appendChild(snowflake);
+    }
+
     const questions = [
-     {
-  text: "你發現氣溫已降到零下五十度，你會？",
-  options: [
-    { text: "按計畫出發，我相信自己判斷", score: { I: 1, T: 1 } },
-    { text: "改變計畫，等有人陪我再出發", score: { F: 1, J: 1 } },
-    { text: "想太多會拖慢進度，先走再說", score: { E: 1, P: 1 } },
-    { text: "這天氣太誇張，我決定不出發", score: { I: 1, S: 1 } }
-  ]
-}
-     {
-  text: "途中你掉進了冰冷的溪水，你會怎麼辦？",
-  options: [
-     { text: "找樹下避風處再升火", score: { J: 1, S: 1 } },
-     { text: "立刻原地升火，不能再拖了", score: { P: 1, T: 1 } },
-      { text: "嘗試靠奔跑取暖", score: { E: 1, S: 1 } },
-      { text: "冷靜下來，先評估身體狀況再做決定", score: { I: 1, N: 1 } }
-        ],
+      {
+        text: "你發現氣溫已降到零下五十度，你會？",
+        options: [
+          { text: "按計畫出發，我相信自己判斷", score: { I: 1, T: 1 } },
+          { text: "改變計畫，等有人陪我再出發", score: { F: 1, J: 1 } },
+          { text: "想太多會拖慢進度，先走再說", score: { E: 1, P: 1 } },
+          { text: "不出發，尋找安全處等待救援", score: { I: 1, J: 1 } }
+        ]
       },
       {
-  text: "火被雪熄滅了。你會？",
-  options: [
-    { text: "再試一次升火，我不能放棄", score: { J: 1, T: 1 } },
-    { text: "尋找樹枝和更好的位置重新嘗試", score: { S: 1, P: 1 } },
-    { text: "內心開始出現絕望與過往回憶", score: { I: 1, N: 1 } },
-    { text: "嘗試喊叫求救或尋找其他人", score: { E: 1, F: 1 } }
-  ]
-}
-
+        text: "途中你掉進了冰冷的溪水，你會怎麼辦？",
+        options: [
+          { text: "找樹下避風處再升火", score: { J: 1, S: 1 } },
+          { text: "立刻原地升火，不能再拖了", score: { P: 1, T: 1 } },
+          { text: "嘗試靠奔跑取暖", score: { E: 1, S: 1 } },
+          { text: "保持冷靜，脫掉濕衣，尋找乾燥地方保暖", score: { I: 1, N: 1 } }
+        ]
+      },
+      {
+        text: "你好不容易點起火但火卻熄滅了，你會怎麼做？",
+        options: [
+          { text: "尋找樹枝與更好的位置重新嘗試", score: { T: 1, S: 1 } },
+          { text: "內心開始出現絕望與過往回憶", score: { I: 1, N: 1 } },
+          { text: "用身體取暖，等待救援", score: { I: 1, N: 1 } },
+          { text: "嘗試喊叫求救或尋找其他人", score: { E: 1, F: 1 } }
+        ]
+      },
       {
   text: "手指凍傷幾乎不能動，你會？",
   options: [
@@ -128,7 +148,7 @@
 }
 
       {
-  text: "你只剩下最後一次選擇機會，你會？",
+  text: "你沒有任何的火柴能夠點火了，你會？",
   options: [
     { text: "放下一切靜靜等待，也許是命運的安排", score: { I: 1, N: 1 } },
     { text: "抱住狗，試圖從牠身上取暖", score: { F: 1, S: 1 } },
@@ -136,109 +156,202 @@
     { text: "試圖找出能發出訊號的東西求救", score: { E: 1, P: 1 } }
   ]
 }
-    ];
 
-    const quizDiv = document.getElementById("quiz");
-    const submitBtn = document.getElementById("submitBtn");
-    const resultDiv = document.getElementById("result");
-    const typeText = document.getElementById("typeText");
-    const scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
 
-    questions.forEach((q, i) => {
-      const qDiv = document.createElement("div");
-      qDiv.className = "mb-4";
-      qDiv.innerHTML = `<p class="font-semibold">${i + 1}. ${q.text}</p>`;
-      q.options.forEach((opt, j) => {
-        const id = `q${i}_opt${j}`;
-        qDiv.innerHTML += `
-          <div>
-            <input type="radio" name="q${i}" id="${id}" value="${j}" class="mr-2" />
-            <label for="${id}">${opt.text}</label>
-          </div>`;
+    const quizDiv = document.getElementById('quiz');
+    const submitBtn = document.getElementById('submitBtn');
+    const resultDiv = document.getElementById('result');
+    const typeText = document.getElementById('typeText');
+    const descText = document.getElementById('descText');
+
+    let scores = { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 };
+    let answers = new Array(questions.length).fill(null);
+
+    function renderQuestion(index) {
+      quizDiv.innerHTML = '';
+      const q = questions[index];
+
+      const qText = document.createElement('h2');
+      qText.className = 'text-xl font-semibold mb-4';
+      qText.textContent = `${index+1}. ${q.text}`;
+      quizDiv.appendChild(qText);
+
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-ice block w-full text-left px-4 py-3 mb-3';
+        btn.textContent = opt.text;
+        btn.onclick = () => {
+          answers[index] = i;
+          updateScores();
+          if(index < questions.length -1) {
+            renderQuestion(index + 1);
+          } else {
+            submitBtn.style.display = 'block';
+          }
+        };
+        if(answers[index] === i){
+          btn.style.background = 'linear-gradient(135deg, #6dd5fa, #0d47a1)';
+        }
+        quizDiv.appendChild(btn);
       });
-      quizDiv.appendChild(qDiv);
-    });
+    }
 
-    quizDiv.addEventListener("change", () => {
-      const allAnswered = questions.every((_, i) => {
-        return document.querySelector(`input[name='q${i}']:checked`);
-      });
-      submitBtn.classList.toggle("hidden", !allAnswered);
-    });
-
-    submitBtn.addEventListener("click", () => {
-      questions.forEach((q, i) => {
-        const choice = document.querySelector(`input[name='q${i}']:checked`).value;
-        const scoreObj = q.options[choice].score;
-        for (const key in scoreObj) {
-          scores[key] += scoreObj[key];
+    function updateScores(){
+      // Reset scores
+      for(let key in scores) scores[key] = 0;
+      answers.forEach((ans, idx) => {
+        if(ans !== null){
+          const opt = questions[idx].options[ans];
+          for(let key in opt.score){
+            scores[key] += opt.score[key];
+          }
         }
       });
+    }
 
-      const labels = ["E/I", "S/N", "T/F", "J/P"];
-      const radarData = {
-        labels,
-        datasets: [
-          {
-            label: "MBTI 傾向",
-            data: [scores.E - scores.I, scores.S - scores.N, scores.T - scores.F, scores.J - scores.P].map(
-              (x) => (x + 3) * 10
-            ), // shift for chart display
-            backgroundColor: "rgba(59, 130, 246, 0.2)",
-            borderColor: "rgba(59, 130, 246, 1)",
-            borderWidth: 2,
-          },
-        ],
+    submitBtn.onclick = () => {
+      // 顯示結果
+      showResult();
+    };
+
+    function showResult(){
+      quizDiv.style.display = 'none';
+      submitBtn.style.display = 'none';
+      resultDiv.classList.remove('hidden');
+
+      const radarCtx = document.getElementById('radarChart').getContext('2d');
+
+      const data = {
+        labels: ['E', 'I', 'S', 'N', 'T', 'F', 'J', 'P'],
+        datasets: [{
+          label: '分數',
+          data: [
+            scores.E,
+            scores.I,
+            scores.S,
+            scores.N,
+            scores.T,
+            scores.F,
+            scores.J,
+            scores.P
+          ],
+          fill: true,
+          backgroundColor: 'rgba(32, 137, 220, 0.2)',
+          borderColor: '#2091dc',
+          pointBackgroundColor: '#2091dc',
+          pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: '#2091dc',
+          tension: 0.3,
+          borderWidth: 2,
+        }]
       };
 
-      new Chart(document.getElementById("radarChart"), {
-        type: "radar",
-        data: radarData,
+      const config = {
+        type: 'radar',
+        data,
         options: {
           scales: {
             r: {
-              suggestedMin: 0,
-              suggestedMax: 60,
-            },
+              min: 0,
+              max: 5,
+              ticks: { stepSize: 1, color: '#a8d0ff' },
+              pointLabels: { color: '#e0f0ff', font: { size: 14 } },
+              grid: { color: 'rgba(255 255 255 / 0.15)' }
+            }
           },
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      };
+
+      new Chart(radarCtx, config);
+
+      const mbti = [
+        scores.E >= scores.I ? 'E' : 'I',
+        scores.S >= scores.N ? 'S' : 'N',
+        scores.T >= scores.F ? 'T' : 'F',
+        scores.J >= scores.P ? 'J' : 'P',
+      ].join('');
+
+      const personalityMap = {
+        'ISTJ': {
+          type: '謹慎型守護者',
+          desc: '踏實穩重，注重責任與傳統，靠計劃與紀律面對挑戰。'
         },
-      });
-const type = `${scores.I > scores.E ? 'I' : 'E'}${scores.S > scores.N ? 'S' : 'N'}${scores.T > scores.F ? 'T' : 'F'}${scores.J > scores.P ? 'J' : 'P'}`;
+        'ISFJ': {
+          type: '謹慎型守護者',
+          desc: '細心溫和，重視他人需要，默默付出維護安全。'
+        },
+        'INFJ': {
+          type: '謹慎型理想主義者',
+          desc: '富有遠見且深思熟慮，憑直覺與同理心引領方向。'
+        },
+        'INTJ': {
+          type: '謹慎型策略家',
+          desc: '冷靜理性，擅長規劃與分析，喜歡掌控全局。'
+        },
+        'ISTP': {
+          type: '冒險型實踐者',
+          desc: '靈活務實，喜歡動手解決問題，面對危機冷靜。'
+        },
+        'ISFP': {
+          type: '冒險型生存者',
+          desc: '隨和自由，注重當下感受，擅長應對突發狀況。'
+        },
+        'INFP': {
+          type: '謹慎型夢想家',
+          desc: '理想主義者，情感豐富，尋找生命意義與價值。'
+        },
+        'INTP': {
+          type: '謹慎型思考者',
+          desc: '冷靜理性，善於分析與獨立思考，喜歡探究真理。'
+        },
+        'ESTP': {
+          type: '冒險型挑戰者',
+          desc: '果斷行動派，喜歡刺激與冒險，反應敏捷。'
+        },
+        'ESFP': {
+          type: '冒險型生存者',
+          desc: '活力充沛，喜歡嘗試新事物，適應能力強。'
+        },
+        'ENFP': {
+          type: '冒險型激勵者',
+          desc: '充滿熱情與創意，善於激發他人與自己。'
+        },
+        'ENTP': {
+          type: '冒險型探索者',
+          desc: '思維靈活，喜歡創新與解決問題，敢於冒險。'
+        },
+        'ESTJ': {
+          type: '謹慎型守護者',
+          desc: '腳踏實地，注重計劃與責任，是團隊中可靠力量。'
+        },
+        'ESFJ': {
+          type: '謹慎型照顧者',
+          desc: '熱心助人，善於組織與維持和諧關係。'
+        },
+        'ENFJ': {
+          type: '謹慎型領導者',
+          desc: '善於溝通與激勵，具備強大影響力與責任感。'
+        },
+        'ENTJ': {
+          type: '謹慎型指揮官',
+          desc: '果斷領導者，善於規劃與執行宏大計畫。'
+        }
+      };
 
-let style = '';
-if (type[0] === 'E' && type[3] === 'P') {
-  style = '🧭 冒險型生存者：你勇於行動、適應力強，面對極端環境也不輕言放棄。';
-} else if (type[0] === 'I' && type[3] === 'J') {
-  style = '🔍 謹慎型規劃者：你喜歡計畫周全，穩扎穩打，遇到困境也會冷靜分析。';
-} else if (type[2] === 'T' && type[3] === 'J') {
-  style = '🔥 堅毅型求生者：你邏輯清晰、有執行力，是危機中值得信賴的領導者。';
-} else if (type[2] === 'F') {
-  style = '🌲 感性型倖存者：你重視情感與直覺，雖可能不夠理性，但你的人性光輝常成為關鍵。';
-} else {
-  style = '❓ 多面向的生存者：你具有多元的適應方式，或許能在意想不到的情境中活下來。';
-}
+      const result = personalityMap[mbti] || {
+        type: '多面向求生者',
+        desc: '你的個性融合多種特質，具有獨特的求生能力。'
+      };
 
-typeText.innerText = `你的 MBTI 傾向是 ${type}\n${style}`;
-      resultDiv.classList.remove("hidden");
-      submitBtn.disabled = true;
-    });
-  </script>
-
-  <script>
-    // 雪花產生器
-    const colors = ["#e0f7fa", "#b3e5fc", "#81d4fa", "#4fc3f7", "#29b6f6"];
-    for (let i = 0; i < 50; i++) {
-      const snowflake = document.createElement("div");
-      snowflake.classList.add("snowflake");
-      snowflake.style.left = Math.random() * 100 + "vw";
-      snowflake.style.animationDuration = 5 + Math.random() * 10 + "s";
-      snowflake.style.fontSize = 10 + Math.random() * 15 + "px";
-      snowflake.style.opacity = Math.random();
-      snowflake.style.animationDelay = Math.random() * 20 + "s";
-      snowflake.style.color = colors[Math.floor(Math.random() * colors.length)];
-      snowflake.textContent = "❄";
-      document.body.appendChild(snowflake);
+      typeText.textContent = `${mbti} - ${result.type}`;
+      descText.textContent = result.desc;
     }
+
+    renderQuestion(0);
   </script>
 </body>
 </html>
