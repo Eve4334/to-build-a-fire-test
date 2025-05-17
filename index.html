@@ -2,35 +2,76 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>你能在零下50度中活下來嗎？</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* 雪花動畫 */
+    /* 冰藍漸層背景 */
     body {
-      <audio autoplay loop>
-  <source src="wind.mp3" type="audio/mpeg">
-</audio>
-
-      background: linear-gradient(to bottom, #000428, #004e92);
-      overflow: hidden;
+      background: linear-gradient(135deg, #d0e7f9 0%, #a4c8f0 70%, #5a8fd6 100%);
+      position: relative;
+      overflow-x: hidden;
     }
-    .snowflake {
-      position: absolute;
-      top: -10px;
-      width: 10px;
-      height: 10px;
-      background: white;
-      border-radius: 50%;
-      opacity: 0.8;
-      animation: fall linear infinite;
-    }
-    @keyframes fall {
-      to {
-        transform: translateY(100vh);
+    /* 雪花動畫 */
+    @keyframes snowFall {
+      0% {
+        transform: translateY(-10px) translateX(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(110vh) translateX(20px);
+        opacity: 0;
       }
     }
+    .snowflake {
+      position: fixed;
+      top: -10px;
+      color: #fff;
+      font-size: 1.5rem;
+      user-select: none;
+      pointer-events: none;
+      animation-name: snowFall;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      z-index: 9999;
+    }
+    /* 問題卡片風格 */
+    #quiz > div {
+      background: rgba(255 255 255 / 0.15);
+      border-radius: 0.75rem;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 0 15px rgba(255 255 255 / 0.3);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255 255 255 / 0.3);
+      transition: box-shadow 0.3s ease;
+    }
+    #quiz > div:hover {
+      box-shadow: 0 0 25px rgba(255 255 255 / 0.6);
+    }
+    /* 按鈕冰藍風格 */
+    #submitBtn {
+      background: linear-gradient(135deg, #6cb4ee, #3b82f6);
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.5);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+    #submitBtn:hover {
+      background: linear-gradient(135deg, #4a8dde, #2563eb);
+      box-shadow: 0 6px 25px rgba(37, 99, 235, 0.8);
+    }
+    #submitBtn:disabled {
+      background: #93c5fd;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+    /* 結果區域字體顏色偏冷 */
+    #result h2,
+    #result p {
+      color: #e0f2fe;
+      text-shadow: 0 0 5px #3b82f6;
+    }
+  </style>
 
     /* 冰晶裂開動畫 */
     .crack {
