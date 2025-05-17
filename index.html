@@ -1,53 +1,92 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>你能在零下50度中活下來嗎？</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    /* 雪花動畫 */
     body {
-      background: linear-gradient(to bottom, #cfe5f5, #e0f7fa);
-      background-image: url('https://images.unsplash.com/photo-1608889175763-929dbf8dfe68?auto=format&fit=crop&w=1470&q=80');
-      background-size: cover;
-      background-attachment: fixed;
-      background-position: center;
+      <audio autoplay loop>
+  <source src="wind.mp3" type="audio/mpeg">
+</audio>
+
+      background: linear-gradient(to bottom, #000428, #004e92);
+      overflow: hidden;
     }
-    .snow {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
+    .snowflake {
+      position: absolute;
+      top: -10px;
+      width: 10px;
+      height: 10px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: fall linear infinite;
+    }
+    @keyframes fall {
+      to {
+        transform: translateY(100vh);
+      }
+    }
+
+    /* 冰晶裂開動畫 */
+    .crack {
+      animation: crack 0.5s forwards;
+    }
+    @keyframes crack {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1) rotate(5deg); }
+      100% { transform: scale(1) rotate(0deg); }
     }
   </style>
 </head>
-<body class="bg-blue-50/80 text-gray-800 font-sans relative">
-  <canvas class="snow"></canvas>
-  <div class="max-w-xl mx-auto p-4 bg-white/80 rounded-xl shadow-lg z-10 relative">
-    <h1 class="text-3xl font-bold mb-4 text-center">你能在零下50度中活下來嗎？</h1>
+<body class="bg-blue-50 text-gray-800 font-sans relative">
+  <!-- 背景風聲 -->
+  <audio autoplay loop>
+    <source src="your-audio-file.mp3" type="audio/mpeg">
+    您的瀏覽器不支援音訊播放。
+  </audio>
+
+  <!-- 雪花容器 -->
+  <div id="snow-container"></div>
+
+  <div class="max-w-xl mx-auto p-4">
+    <h1 class="text-3xl font-bold mb-4 text-center text-white">你能在零下50度中活下來嗎？</h1>
     <div id="quiz"></div>
     <button id="submitBtn" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 hidden">查看結果</button>
     <div id="result" class="mt-6 hidden">
-      <h2 class="text-2xl font-semibold mb-2">你的求生人格</h2>
+      <h2 class="text-2xl font-semibold mb-2 text-white">你的求生人格</h2>
       <canvas id="radarChart" width="400" height="400"></canvas>
-      <p id="typeText" class="mt-4 text-lg whitespace-pre-line"></p>
+      <p id="typeText" class="mt-4 text-lg text-white"></p>
     </div>
   </div>
 
   <script>
+    // 雪花動畫
+    const snowContainer = document.getElementById('snow-container');
+    for (let i = 0; i < 100; i++) {
+      const snowflake = document.createElement('div');
+      snowflake.classList.add('snowflake');
+      snowflake.style.left = Math.random() * window.innerWidth + 'px';
+      snowflake.style.animationDuration = (Math.random() * 3 + 2) + 's';
+      snowflake.style.opacity = Math.random();
+      snowContainer.appendChild(snowflake);
+    }
+
     const questions = [
       {
-        text: "你發現氣溫降到零下50度，獨自一人準備啟程，你會？",
+        text: "你發現氣溫已降到零下五十度，你會？",
         options: [
-          { text: "依照原定計畫出發，相信自己的準備足夠。", score: { I: 1, T: 1 } },
-          { text: "通知朋友後等待夥伴同行。", score: { F: 1, J: 1 } },
-          { text: "直接出發，邊走邊看情況應變。", score: { E: 1, P: 1 } },
-          { text: "覺得這天氣太危險，決定不出發。", score: { I: 1, S: 1 } }
+          { text: "按計畫出發，我相信自己判斷", score: { I: 1, T: 1 } },
+          { text: "改變計畫，等有人陪我再出發", score: { F: 1, J: 1 } },
+          { text: "想太多會拖慢進度，先走再說", score: { E: 1, P: 1 } },
+          { text: "決定不出發，等待天氣回暖", score: { S: 1, J: 1 } }
         ]
       },
-      {
+       {
         text: "途中你掉進冰水裡，衣服濕透，你會？",
         options: [
           { text: "尋找風小的地方升火取暖。", score: { J: 1, S: 1 } },
@@ -94,19 +133,26 @@
     questions.forEach((q, i) => {
       const qDiv = document.createElement('div');
       qDiv.className = 'mb-4';
-      qDiv.innerHTML = `<p class="font-semibold">${i + 1}. ${q.text}</p>`;
+      qDiv.innerHTML = `<p class="font-semibold text-white">${i + 1}. ${q.text}</p>`;
       q.options.forEach((opt, j) => {
         const id = `q${i}_opt${j}`;
         qDiv.innerHTML += `
           <div>
             <input type="radio" name="q${i}" id="${id}" value="${j}" class="mr-2">
-            <label for="${id}">${opt.text}</label>
+            <label for="${id}" class="text-white">${opt.text}</label>
           </div>`;
       });
       quizDiv.appendChild(qDiv);
     });
 
-    quizDiv.addEventListener('change', () => {
+    quizDiv.addEventListener('change', (e) => {
+      if (e.target && e.target.tagName === 'INPUT') {
+        e.target.parentElement.classList.add('crack');
+        setTimeout(() => {
+          e.target.parentElement.classList.remove('crack');
+        }, 500);
+      }
+
       const allAnswered = questions.every((_, i) => {
         return document.querySelector(`input[name='q${i}']:checked`);
       });
@@ -153,76 +199,21 @@
       });
 
       const type = `${scores.I > scores.E ? 'I' : 'E'}${scores.S > scores.N ? 'S' : 'N'}${scores.T > scores.F ? 'T' : 'F'}${scores.J > scores.P ? 'J' : 'P'}`;
-      let style = '';
-      if (type[0] === 'E' && type[3] === 'P') {
-        style = '🧭 冒險型生存者：你勇於行動、適應力強，面對極端環境也不輕言放棄。';
-      } else if (type[0] === 'I' && type[3] === 'J') {
-        style = '🔍 謹慎型規劃者：你喜歡計畫周全，穩扎穩打，遇到困境也會冷靜分析。';
-      } else if (type[2] === 'T' && type[3] === 'J') {
-        style = '🔥 堅毅型求生者：你邏輯清晰、有執行力，是危機中值得信賴的領導者。';
-      } else if (type[2] === 'F') {
-        style = '🌲 感性型倖存者：你重視情感與直覺，雖可能不夠理性，但你的人性光輝常成為關鍵。';
+      let personality = '';
+      // 根據 MBTI 類型給予冒險型或保守型的標籤
+      if (type === 'ESTP' || type === 'ENTP' || type === 'ENFP') {
+        personality = '冒險型';
+      } else if (type === 'ISTJ' || type === 'ISFJ' || type === 'INFJ') {
+        personality = '保守型';
       } else {
-        style = '❓ 多面向的生存者：你具有多元的適應方式，或許能在意想不到的情境中活下來。';
+        personality = '平衡型';
       }
-      typeText.innerText = `你的 MBTI 傾向是 ${type}\n${style}`;
+
+      typeText.innerText = `你的 MBTI 傾向是 ${type}，屬於 ${personality}`;
 
       resultDiv.classList.remove('hidden');
       submitBtn.disabled = true;
     });
-  </script>
-
-  <script>
-    // 下雪動畫
-    const canvas = document.querySelector('.snow');
-    const ctx = canvas.getContext('2d');
-    let width, height;
-    let snowflakes = [];
-
-    function resize() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    }
-
-    function createSnowflakes() {
-      const x = Math.random() * width;
-      const y = Math.random() * height;
-      const radius = Math.random() * 4 + 1;
-      const speed = Math.random() * 1 + 0.5;
-      snowflakes.push({ x, y, radius, speed });
-    }
-
-    function drawSnowflakes() {
-      ctx.clearRect(0, 0, width, height);
-      ctx.fillStyle = 'white';
-      ctx.beginPath();
-      for (const flake of snowflakes) {
-        ctx.moveTo(flake.x, flake.y);
-        ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
-      }
-      ctx.fill();
-      updateSnowflakes();
-    }
-
-    function updateSnowflakes() {
-      for (const flake of snowflakes) {
-        flake.y += flake.speed;
-        if (flake.y > height) {
-          flake.y = -flake.radius;
-          flake.x = Math.random() * width;
-        }
-      }
-    }
-
-    function loop() {
-      drawSnowflakes();
-      requestAnimationFrame(loop);
-    }
-
-    window.addEventListener('resize', resize);
-    resize();
-    setInterval(createSnowflakes, 100);
-    loop();
   </script>
 </body>
 </html>
